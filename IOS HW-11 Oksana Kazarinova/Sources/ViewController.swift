@@ -24,6 +24,7 @@ final class ViewController: UIViewController, CAAnimationDelegate {
     let startPoint = CGFloat(-Double.pi / 2)
     let endPoint = CGFloat(3 * Double.pi / 2)
     private var isAnimationStarted = false
+    var timerCorrection = 1000
 
     // MARK: - UI
 
@@ -76,7 +77,7 @@ final class ViewController: UIViewController, CAAnimationDelegate {
     }
 
     private func startTimer() {
-        timer = Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(runTimer), userInfo: nil, repeats: true)
+        timer = Timer.scheduledTimer(timeInterval: 0.001, target: self, selector: #selector(runTimer), userInfo: nil, repeats: true)
     }
 
     private func formatTime() -> String {
@@ -86,7 +87,12 @@ final class ViewController: UIViewController, CAAnimationDelegate {
     }
 
     @objc private func runTimer() {
-        if time < 1 {
+        if timerCorrection > 0 {
+            timerCorrection -= 1
+            return
+        }
+        timerCorrection = 1000
+        if time <= 1 {
             statusLabel.text = isWorkTime ? "Rest" : "Work"
             time = isWorkTime ? restTime : workTime
             timer.invalidate()
@@ -155,7 +161,6 @@ final class ViewController: UIViewController, CAAnimationDelegate {
 
     private func progressAnimation() {
         let progressAnimation = CABasicAnimation(keyPath: "strokeEnd")
-        //let time = isWorkTime ? workTime : restTime
         progressLayer.strokeEnd = 0.0
         progressAnimation.keyPath = "strokeEnd"
         progressAnimation.fromValue = 0
@@ -187,20 +192,10 @@ final class ViewController: UIViewController, CAAnimationDelegate {
         progressLayer.beginTime = 0.0
         let timeAfterPaused = progressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
         progressLayer.beginTime = timeAfterPaused
-
     }
-
-//  private func startResumeAnimation() {
-//        if isAnimationStarted {
-//            resumeAnimation()
-//        } else {
-//            progressAnimation()
-//        }
-//    }
 
     @objc private func buttonTappped() {
         createProgressBar()
-
         if !isStarted {
             if !isAnimationStarted {
                 progressAnimation()
@@ -210,7 +205,6 @@ final class ViewController: UIViewController, CAAnimationDelegate {
             startTimer()
             stopStartButton.setImage(loadSFImage(name: "pause.circle.fill"), for: .normal)
             isStarted = true
-
         } else {
             pauseAnimation()
             timer.invalidate()
