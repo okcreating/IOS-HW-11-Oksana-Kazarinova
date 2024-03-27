@@ -160,7 +160,7 @@ final class ViewController: UIViewController, CAAnimationDelegate {
         progressAnimation.keyPath = "strokeEnd"
         progressAnimation.fromValue = 0
         progressAnimation.toValue = 1
-        progressAnimation.speed = 0.85
+        progressAnimation.speed = 1
         progressAnimation.duration = Double(time)
         progressAnimation.isAdditive = true
         progressAnimation.fillMode = .forwards
@@ -182,7 +182,7 @@ final class ViewController: UIViewController, CAAnimationDelegate {
 
     private func resumeAnimation() {
         let pausedTime = progressLayer.timeOffset
-        progressLayer.speed = 0.85
+        progressLayer.speed = 1
         progressLayer.timeOffset = 0.0
         progressLayer.beginTime = 0.0
         let timeAfterPaused = progressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
