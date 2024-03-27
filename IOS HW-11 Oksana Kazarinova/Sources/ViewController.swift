@@ -23,7 +23,7 @@ final class ViewController: UIViewController, CAAnimationDelegate {
     private var progressLayer = CAShapeLayer()
     let startPoint = CGFloat(-Double.pi / 2)
     let endPoint = CGFloat(3 * Double.pi / 2)
-    private var isAnimationStarted = true
+    private var isAnimationStarted = false
 
     // MARK: - UI
 
@@ -86,17 +86,16 @@ final class ViewController: UIViewController, CAAnimationDelegate {
     }
 
     @objc private func runTimer() {
-        if time <= 1 {
+        if time < 1 {
             statusLabel.text = isWorkTime ? "Rest" : "Work"
             time = isWorkTime ? restTime : workTime
             timer.invalidate()
-            isWorkTime = !isWorkTime
-
             stopAnimation()
             statusLabel.textColor = isWorkTime ? .green : .red
             timeLabel.textColor = isWorkTime ? .green : .red
             stopStartButton.backgroundColor = isWorkTime ? .green : .red
             stopStartButton.setImage(loadSFImage(name: "play.circle.fill"), for: .normal)
+            isWorkTime = !isWorkTime
             isStarted = false
             timeLabel.text = formatTime()
         } else {
@@ -161,6 +160,7 @@ final class ViewController: UIViewController, CAAnimationDelegate {
         progressAnimation.keyPath = "strokeEnd"
         progressAnimation.fromValue = 0
         progressAnimation.toValue = 1
+        progressAnimation.speed = 1
         progressAnimation.duration = Double(time)
         progressAnimation.isAdditive = true
         progressAnimation.fillMode = .forwards
@@ -170,40 +170,47 @@ final class ViewController: UIViewController, CAAnimationDelegate {
     }
 
     private func pauseAnimation() {
-        let pausedTime = progressLayer.convertTime(CACurrentMediaTime(), from: nil)
+        let pausedTime1 = progressLayer.convertTime(CACurrentMediaTime(), from: nil)
         progressLayer.speed = 0.0
-        progressLayer.timeOffset = pausedTime
+        progressLayer.timeOffset = pausedTime1
     }
 
     private func stopAnimation() {
-        isAnimationStarted = false
         progressLayer.removeAnimation(forKey: "strokeEnd")
+        isAnimationStarted = false
     }
 
     private func resumeAnimation() {
         let pausedTime = progressLayer.timeOffset
-        progressLayer.speed = 0.8
+        progressLayer.speed = 1
         progressLayer.timeOffset = 0.0
         progressLayer.beginTime = 0.0
         let timeAfterPaused = progressLayer.convertTime(CACurrentMediaTime(), from: nil) - pausedTime
         progressLayer.beginTime = timeAfterPaused
+
     }
 
-  private func startResumeAnimation() {
-        if isAnimationStarted {
-            resumeAnimation()
-        } else {
-            progressAnimation()
-        }
-    }
+//  private func startResumeAnimation() {
+//        if isAnimationStarted {
+//            resumeAnimation()
+//        } else {
+//            progressAnimation()
+//        }
+//    }
 
     @objc private func buttonTappped() {
+        createProgressBar()
+
         if !isStarted {
-            createProgressBar()
-            isAnimationStarted ? resumeAnimation() : progressAnimation()
+            if !isAnimationStarted {
+                progressAnimation()
+            } else {
+                resumeAnimation()
+            }
             startTimer()
             stopStartButton.setImage(loadSFImage(name: "pause.circle.fill"), for: .normal)
             isStarted = true
+
         } else {
             pauseAnimation()
             timer.invalidate()
